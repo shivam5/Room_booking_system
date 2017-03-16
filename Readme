@@ -1,0 +1,89 @@
+
+Project Details
+================
+This is a simple room booking system made in C++.
+
+Task description
+------------------
+1. Write a program for an online room booking system. The program should have  
+capability to add new room to the system. 
+2. Read the room details from the file “ROOM.txt” and add to the system using the  
+add functionality. You can assume maximum number of rooms to be 1000. 
+3. Extend the system to add Labs which have the following attributes: name, area,  
+number of doors, location (X,Y), and number of computers. Read the lab details  
+from the file “LAB.txt” and add to the system. 
+4. Further extend the system to have lecture halls with the following attributes:  
+name, area, number of doors, location (X,Y), number of chairs. Read the details  
+from the file “LEC.txt” and add to the system.
+
+Functionalities 
+The developed system should implement the following functionalities: 
+1. The program should be able to add rooms, labs, or lecture halls to the system  
+dynamically. 
+2. The program should be able to remove a room, lab, or lecture hall from the  
+system. 
+3. The program should have a mechanism to book a room, lab, or lecture hall. 
+4. A person needs 30 units of the area to sleep in a room. The program should give  
+the minimum number of rooms required to accommodate given number of  
+persons. 
+5. The program should be able to find the smallest lecture hall that can  
+accommodate the given number of students [use chair information]. 
+6. The program should find the lab with least equipment density (computers per  
+area unit) and should be able to add new equipment to the system[increasing the  
+number of equipments is sufficient]. 
+7. Find a room nearest to the given location. 
+8. Mechanism to book or un­book a room, lab, and lecture hall. 
+9. Program should be able to print all details of the given room, lab, and lecture hall.  
+10. When you exit the program, the system must store current booking status in a  
+text file. The text file is loaded back to memory when the program starts again.  
+
+Author
+==============
+Shivam Mittal
+2nd year B.Tech Computer Science Engineering, IIT Ropar
+Email - 2015csb1032@iitrpr.ac.in
+Github profile - github.com/shivam5
+
+
+COMPILING AND RUNNING PROGRAM
+====================================
+1. Extract the contents of this archive in a folder.
+2. Open terminal.
+3. Navigate to the folder which contains all these files using cd commands.
+4. Type make and press enter. This will automatically compile main.cpp, room.cpp, lab.cpp, lec.cpp to create object files main.o, room.o, lab.o and lec.o and links them and create a file prog which is necessary executable file.
+5. Type ./prog and press enter.
+6. The program would run, just follow the instructions from there.
+7. Press and enter 10 to exit the program.
+8. In case you give some wrong input, press Ctrl+Z to break the infinite loop that would be going on.
+
+
+IMPLEMENTATION
+================
+The room management system is implemented in C++. The program is implemented using vectors.
+Three classes have been made namely room, lab and lec.
+
+
+FILE INFORMATION
+====================
+Header Files -  room.h -> Stores definitions for room class
+		lab.h -> Stores definitions for lab class
+		lec.h -> Stores definitions for lec class
+		conio.h -> To implement a function mainly used for waiting - getch()
+
+CPP Files -   main.cpp -> Contains the main program
+		room.cpp -> Declarations related to room class
+		lab.cpp -> Declarations related to lab class
+		lec.cpp -> Declarations related to lec class
+
+Text Files - 	ROOM.txt -> Contains all room details in the given format of the input file
+		bookroom.txt -> Contains the booking information for rooms. Contains name of room and 0/1 for booking status.
+		LAB.txt -> Contains all lab details in the given format of the input file
+		booklab.txt -> Contains the booking information for labs. Contains name of lab and 0/1 for booking status.
+		LEC.txt -> Contains all lecture hall details in the given format of the input file
+		booklec.txt -> Contains the booking information for lecture halls. Contains name of room and 0/1 for booking status.
+
+Makefile - File used to compile and link all the various cpp files in one go - Easy compilation.
+
+
+
+THANK YOU

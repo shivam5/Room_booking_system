@@ -1,0 +1,677 @@
+
+#include <iostream>
+#include<string>
+#include<vector>
+#include<fstream>
+#include<stdlib.h>
+#include "conio.h"
+#include "room.h"
+#include "lec.h"
+#include "lab.h"
+
+using namespace std;
+
+//Creating vector of class type pointers that points to each object
+vector<room*> r;
+vector<lab*> la;
+vector<lec*> le;
+
+//Loading the saved data from .txt files
+void load(){
+  string name,xa;
+  float area;
+  int door,x,y,status=0,computer,chair;
+  ifstream fin ("ROOM.txt");
+  ifstream fin1("bookroom.txt");
+  while(fin>>name>>area>>door>>x>>y){
+    fin1>>xa>>status;
+    room *obj=new room(name,area,door,x,y,status);
+    r.push_back(obj);
+  }
+  fin.close();
+  fin1.close();
+  
+  ifstream lafin ("LAB.txt");
+  ifstream lafin1("booklab.txt");
+  while(lafin>>name>>area>>door>>x>>y>>computer){
+    lafin1>>xa>>status;
+    lab *obj=new lab(name,area,door,x,y,computer,status);
+    la.push_back(obj);
+  }
+  lafin.close();
+  lafin1.close();
+  
+  ifstream lefin ("LEC.txt");
+  ifstream lefin1("booklec.txt");
+  while(lefin>>name>>area>>door>>x>>y>>chair){
+    lefin1>>xa>>status;
+    lec *obj=new lec(name,area,door,x,y,chair,status);
+    le.push_back(obj);
+  }
+  lefin.close();
+  lefin1.close();
+  
+}
+
+//Function to save the data once the program exits
+void save(){
+  ofstream fout ("ROOM.txt");
+  ofstream fout1 ("bookroom.txt");
+  unsigned int size=r.size();
+  for(unsigned int i=0;i<size;i++){
+    fout<<r[i]->getname()<<"\t"<<r[i]->getarea()<<"\t"<<r[i]->getdoor()<<"\t"<<r[i]->getx()<<"\t"<<r[i]->gety()<<"\n";
+    fout1<<r[i]->getname()<<"\t"<<r[i]->getstatus()<<"\n";
+  }
+  fout.close();
+  fout1.close();
+  
+  ofstream lafout ("LAB.txt");
+  ofstream lafout1 ("booklab.txt");
+  unsigned int lasize=la.size();
+  for(unsigned int i=0;i<lasize;i++){
+    lafout<<la[i]->getname()<<"\t"<<la[i]->getarea()<<"\t"<<la[i]->getdoor()<<"\t"<<la[i]->getx()<<"\t"<<la[i]->gety()<<"\t"<<la[i]->getcomputer()<<"\n";
+    lafout1<<la[i]->getname()<<"\t"<<la[i]->getstatus()<<"\n";
+  }
+  lafout.close();
+  lafout1.close();
+  
+  ofstream lefout ("LEC.txt");
+  ofstream lefout1 ("booklec.txt");
+  unsigned int lesize=le.size();
+  for(unsigned int i=0;i<lesize;i++){
+    lefout<<le[i]->getname()<<"\t"<<le[i]->getarea()<<"\t"<<le[i]->getdoor()<<"\t"<<le[i]->getx()<<"\t"<<le[i]->gety()<<"\t"<<le[i]->getchair()<<"\n";
+    lefout1<<le[i]->getname()<<"\t"<<le[i]->getstatus()<<"\n";
+  }
+  lefout.close();
+  lefout1.close();
+  
+}
+
+
+//   ROOMS FUNCTIONS
+
+//Adding a room
+void addroom(){
+  string name;
+  float area;
+  int door,x,y;
+  cout<<"Enter name, area, number of doors, location (x and y) of the room\n";
+  cin>>name>>area>>door>>x>>y;
+  room *obj=new room(name,area,door,x,y,0);
+  r.push_back(obj);
+  cout<<"Room added successfully";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Displaying all rooms
+void showrooms(){
+  unsigned int size=r.size();
+  for(unsigned int i=0;i<size;i++){
+    r[i]->showdetails();
+  }
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Function to delete a room having name as given (del function is overloaded to even delete labs and lecture halls)
+void del (string name, vector <room*> &x){
+  unsigned int size=x.size(),flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if(x[i]->getname()==name){
+      x.erase(x.begin()+i);
+      flag=1;
+      cout<<"Room Deleted\n";
+    };
+  }
+  if(flag==0)
+    cout<<"Room does not exist\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Operator overloading to compare two rooms according to their area
+bool room::operator > (const room &r1) const{
+  return (area>r1.getarea());
+}
+
+//Function to sort the rooms in decreasing order of room area
+void sortroom (vector <room*> &arr, int length){
+  int j ;
+  room* temp=new room();
+  for (int i = 0; i < length; i++){
+    j = i;
+    while (j > 0 &&( (*arr[j]) > (*arr[j-1]))){
+      temp = arr[j];
+      arr[j] = arr[j-1];
+      arr[j-1] = temp;
+      j--;
+    }
+  }
+}
+
+//Function to return the minimum number of rooms required to accomodate a given number of people.
+//This function just returns the number of rooms and does not book them.
+int minroom(float persons){
+  sortroom(r,r.end()-r.begin());
+  unsigned int size=r.size(),accom;
+  int ctr=0;
+  for(unsigned int i=0;i<size && persons>0;i++){
+    accom=r[i]->getarea()/30;
+    persons=persons-accom;
+    ctr++;
+  }
+  if(persons>0)
+    return -1;
+  else
+    return ctr;
+}
+
+//Power function, used to calculate the distance of one room from a given location
+int pow(int n,int i){
+  int pro=1;
+  for(;i>0;i--)
+    pro=pro*n;
+  return pro;
+}
+
+//Finding nearest room to a given location
+void nearestroom(){
+  float x,y;
+  cout<<"Enter a location";
+  cin>>x>>y;
+  unsigned int size=r.size();
+  int pos=0,min=pow((r[0]->getx()-x),2)+pow((r[0]->gety()-y),2);
+  for(unsigned int i=0;i<size;i++){
+    if(min>(pow((r[i]->getx()-x),2)+pow((r[i]->gety()-y),2))){
+      pos=i;
+      min=(pow((r[i]->getx()-x),2)+pow((r[i]->gety()-y),2));
+    }
+  }
+  r[pos]->showdetails();
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//General function templates for rooms, labs and lecture halls
+
+//Function to show the details of a particular room, lab or lecture hall.
+//Using function template, in the function call it will specified whether room/lab/lecture hall details need to be printed
+template <class type>
+void show(string name,vector <type*> &x){
+  unsigned int size=x.size();
+  int flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if(x[i]->getname()==name){
+      x[i]->showdetails();
+      flag=1;
+    }
+  }
+  if (flag==0)
+    cout<<"Does not exist\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Function template to show all the details of the rooms/labs/lecture halls that are currently available(unbooked) (Used in booking rooms)
+template <class type>
+void showunbooked(vector <type*> &x){
+  unsigned int size=x.size();
+  for(unsigned int i=0;i<size;i++){
+    if(x[i]->getstatus()==0)
+      x[i]->showdetails();
+  }
+}
+
+//Function template to show all the details of the rooms/labs/lecture that are booked (Used in unbooking rooms)
+template <class type>
+void showbooked(vector <type*> &x){
+  unsigned int size=x.size();
+  for(unsigned int i=0;i<size;i++){
+    if(x[i]->getstatus()==1)
+      x[i]->showdetails();
+  }
+}
+
+//Function to book rooms/labs/lecture halls
+template <class type>
+void book(vector <type*> &x){
+  cout<<"\nUnbooked :\n";
+  showunbooked <type>(x);
+  cout<<"Enter the name you want to book\n";
+  string name;
+  cin>>name;
+  
+  unsigned int size=x.size(),flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if((x[i]->getname()==name) && (x[i]->getstatus()==0)){
+      x[i]->addstatus(1);
+      cout<<"Booked\n";
+      flag=1;
+    };
+  }
+  if(flag==0)
+    cout<<"The name you entered does not exist or is already booked\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Function to unbook rooms/labs/lecture halls
+template <class type>
+void unbook(vector <type*> &x){
+  cout<<"\nBooked :\n";
+  showbooked <type>(x);
+  cout<<"Enter the name you want to unbook\n";
+  string name;
+  cin>>name;
+  
+  unsigned int size=x.size(),flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if((x[i]->getname()==name) && (x[i]->getstatus()==1)){
+      x[i]->addstatus(0);
+      cout<<"Unbooked\n";
+      flag=1;
+    };
+  }
+  if(flag==0)
+    cout<<"The name you entered does not exist or is already unbooked\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//  LABS
+
+//Adding a lab
+void addlab(){
+  string name;
+  float area;
+  int door,x,y,computer;
+  cout<<"Enter name, area, number of doors, location (x and y), and number of computers of the lab\n";
+  cin>>name>>area>>door>>x>>y>>computer;
+  lab *obj=new lab(name,area,door,x,y,computer,0);
+  la.push_back(obj);
+  cout<<"Lab added successfully";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Showing the details of all labs
+void showlabs(){
+  unsigned int size=la.size();
+  for(unsigned int i=0;i<size;i++){
+    la[i]->showdetails();
+  }
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Deleting a lab (Overloaded function)
+void del (string name, vector <lab*> &x){
+  unsigned int size=x.size(),flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if(x[i]->getname()==name){
+      x.erase(x.begin()+i);
+      flag=1;
+      cout<<"Lab Deleted\n";
+    };
+  }
+  if(flag==0)
+    cout<<"Lab does not exist\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Showing the lab with minimum number of equipment density and also the option to add equipments to any lab
+void minlab(){
+  unsigned int size=la.size(),i;
+  int pos=0,no=0,ans,comp,flag=0;
+  string name;
+  float min=((la[0]->getcomputer())/(la[0]->getarea()));
+  for(i=0;i<size;i++){
+    if(min>((la[i]->getcomputer())/(la[i]->getarea()))){
+      pos=i;
+      min=((la[i]->getcomputer())/(la[i]->getarea()));
+    }
+  }
+  la[pos]->showdetails();
+  cout<<"\nAdd equipments: \n1. To the same lab\n2. To a different lab\n3. Dont add\n";
+  cin>>ans;
+  switch(ans){
+  case 1:
+    cout<<"Enter the number of computers to be added\n";
+    cin>>no;
+    comp=la[pos]->getcomputer();
+    la[pos]->addcomputer(comp+no);
+    cout<<"Equipments added.\n";
+    break;
+    
+  case 2:
+    cout<<"Enter the name of the lab\n";
+    cin>>name;
+    for(i=0;i<size;i++){
+      if(la[i]->getname()==name){
+	pos=i;
+	flag=1;
+      };
+    }
+    if(flag==0)
+      cout<<"Lab does not exist\n";
+    else{
+      cout<<"Enter the number of computers to be added\n";
+      cin>>no;
+      comp=la[pos]->getcomputer();
+      la[pos]->addcomputer(comp+no);
+      cout<<"Equipments added.\n";
+    }
+    break;
+    
+  case 3:
+    break;
+  default:
+    cout<<"Wrong option entered\n";
+    
+  }
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+
+//  LECTURE HALLS
+
+//Adding a lecture hall
+void addlec(){
+  string name;
+  float area;
+  int door,x,y,chair;
+  cout<<"Enter name, area, number of doors, location (x and y), and number of chairs of the lec\n";
+  cin>>name>>area>>door>>x>>y>>chair;
+  lec *obj=new lec(name,area,door,x,y,chair,0);
+  le.push_back(obj);
+  cout<<"Lecture hall added successfully";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Showing the details of all lecture halls
+void showlecs(){
+  unsigned int size=le.size();
+  for(unsigned int i=0;i<size;i++){
+    le[i]->showdetails();
+  }
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Deleting a lecture hall
+void del (string name, vector <lec*> &x){
+  unsigned int size=x.size(),flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if(x[i]->getname()==name){
+      x.erase(x.begin()+i);
+      flag=1;
+      cout<<"Lecture Deleted\n";
+    };
+  }
+  if(flag==0)
+    cout<<"Lecture hall does not exist\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+//Operator overloading to compare two object accoring to the number of chairs in the lecture hall
+bool lec::operator < (const lec &r1) const{
+  return (chair<r1.getchair());
+}
+
+//Sorting the lecture halls in increasing order of the number of chairs
+void sortlec (vector <lec*> &arr, int length){
+  int j ;
+  lec* temp=new lec();
+    for (int i = 0; i < length; i++){
+    j = i;
+    while (j > 0 &&( (*arr[j]) < (*arr[j-1]))){
+      temp = arr[j];
+      arr[j] = arr[j-1];
+      arr[j-1] = temp;
+      j--;
+    }
+  }
+}
+
+//Finding the smallest lecture hall suitable to accomodate a given number of students
+void minlec(int stud){
+  sortlec(le,le.end()-le.begin());
+  unsigned int size=le.size();
+  int flag=0;
+  for(unsigned int i=0;i<size;i++){
+    if(stud<=(le[i]->getchair())){
+      le[i]->showdetails();
+      flag=1;
+      break;
+    }
+  }
+  
+  if(flag==0)
+    cout<<"Accomodation not possible, too many students\n";
+  cout<<"\nPress any key to continue\n";
+  getch();
+  getch();
+}
+
+
+//MAIN
+
+int main()
+{
+  load(); //Loading data from .txt files
+  
+  int ans1=0,ans2=0,x; //Ans1 for selection option, Ans2 for selecting suboption
+  string dname;
+  while(ans1!=10){
+    
+    //Display Menu
+    //system("cls"); //For windows
+    system("clear");
+    cout<<"\t\t\tRoom Management System\n\n\n";
+    cout<<"1. Add\n";
+    cout<<"2. Remove\n";
+    cout<<"3. Book\n";
+    cout<<"4. Find minimum number of rooms required\n";
+    cout<<"5. Find smallest suitable lecture hall\n";
+    cout<<"6. Find smallest suitable lab and add computers\n";
+    cout<<"7. Find nearest room to a given location\n";
+    cout<<"8. Unbook \n";
+    cout<<"9. Print details\n";
+    cout<<"10. Exit\nEnter your option\n";
+    
+    cin>>ans1; //Getting option from user
+    switch(ans1){
+
+      //ADDING ROOM/LAB/LECTURE HALL
+    case 1:
+      system("clear");
+      cout<<"\nAdd\n1. Room\n2. Lab\n3. Lecture halls\n";
+      cin>>ans2;
+      switch(ans2){
+      case 1:
+	addroom();
+	break;
+      case 2:
+	addlab();
+	break;
+      case 3:
+	addlec();
+	break;
+      default:
+	cout<<"Wrong option entered";
+      }
+      break;
+      
+      //REMOVING ROOM/LAB/LECTURE HALL
+    case 2:
+      system("clear");
+      cout<<"\nRemove\n1. Room\n2. Lab\n3. Lecture halls\n";
+      cin>>ans2;
+      switch(ans2){
+      case 1:
+	showrooms();
+	cout<<"Enter the name of the room you want to delete :";
+	cin>>dname;
+	del(dname,r);
+	break;
+      case 2:
+	showlabs();
+	cout<<"Enter the name of the lab you want to delete :";
+	cin>>dname;
+	del(dname,la);
+	break;
+      case 3:
+	showlecs();
+	cout<<"Enter the name of the lecture hall you want to delete :";
+	cin>>dname;
+	del(dname,le);
+	break;
+      default:
+	cout<<"Wrong option entered";
+      }
+      break;
+
+      // BOOKING ROOM/LAB/LECTURE HALL
+    case 3:
+       system("clear");
+      cout<<"\nBook\n1. Room\n2. Lab\n3. Lecture halls\n";
+      cin>>ans2;
+      switch(ans2){
+      case 1:
+	book<room>(r);
+	break;
+      case 2:
+	book<lab>(la);
+	break;
+      case 3:
+	book<lec>(le);
+	break;
+      default:
+	cout<<"Wrong option entered";
+      }
+      break;
+      
+      // FINDING MINIMUM NUMBER OF ROOMS REQUIRED TO ACCOMODATE N PERSONS
+    case 4:
+      cout<<"Enter the number of persons\n";
+      cin>>ans2;
+      x=minroom(ans2);
+      if(x==-1)
+	cout<<"Not possible to accomodate\n";
+      else
+	cout<<x<<endl;
+      cout<<"\nPress any key to continue\n";
+      getch();
+      getch();
+      break;
+      
+      //FINDING SMALLEST LECTURE HALL REQUIRED TO ACCOMODATE N STUDENTS
+    case 5:
+      cout<<"Enter the number of students you want to accomodate\n";
+      cin>>ans2;
+      minlec(ans2);
+      break;
+      
+      //FINDING LAB WITH LEAST EQUIPMENT DENSITY
+    case 6:
+      minlab();
+      break;
+      
+      //FINDING NEAREST ROOM TO A GIVEN LOCATION
+    case 7:
+      nearestroom();
+      break;
+      
+      //UNBOOKING ROOMS/LABS/LECTURE HALLS
+    case 8:
+       system("clear");
+      cout<<"\nUnbook\n1. Room\n2. Lab\n3. Lecture halls\n";
+      cin>>ans2;
+      switch(ans2){
+      case 1:
+	unbook<room>(r);
+	break;
+      case 2:
+	unbook<lab>(la);
+	break;
+      case 3:
+	unbook<lec>(le);
+	break;
+      default:
+	cout<<"Wrong option entered";
+      }
+      break;
+      
+      //PRINTING DETAILS
+    case 9:
+       system("clear");
+      cout<<"\nPrint details \n1. Given Room\n2. Given Lab\n3. Given Lecture hall\n4. All Rooms\n5. All Labs\n6. All Lecture halls\n7. All details";
+      cin>>ans2;
+      switch(ans2){
+      case 1:
+	cout<<"Enter the name of the room :";
+	cin>>dname;
+	show<room>(dname,r);
+	break;
+      case 2:
+	cout<<"Enter the name of the lab :";
+	cin>>dname;
+	show<lab>(dname,la);
+	break;
+      case 3:
+	cout<<"Enter the name of the lecture hall :";
+	cin>>dname;
+	show<lec>(dname,le);
+	break;
+      case 4:
+	cout<<"\nRooms:\n";
+	showrooms();
+	break;
+      case 5:
+	cout<<"\nLabs:\n";
+	showlabs();
+	break;
+      case 6:
+	cout<<"\nLecture  halls:\n";
+	showlecs();
+	break;
+      case 7:
+	cout<<"\nRooms:\n";
+	showrooms();
+	cout<<"\nLabs:\n";
+	showlabs();
+	cout<<"\nLecture halls:\n";
+	showlecs();
+	break;
+      default:
+	cout<<"Wrong option entered";
+      }
+      break;
+
+      
+    }
+  }
+  
+  system("clear");
+  save(); //Save the details to .txt file
+  return 0;
+}
